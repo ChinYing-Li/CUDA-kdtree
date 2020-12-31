@@ -5,11 +5,10 @@ cmake_minimum_required(VERSION 3.17)
 
 project(CUDA-kdtree
         VERSION 0.0.1
-        DESCRIPTION "GPU-acclerated KD-tree using CUDA"
+        DESCRIPTION "OpenGL Rendering Engine implementing Cluster Shading"
         LANGUAGES CXX C)
 
 enable_testing()
-
 #############################################################################
 # CMAKE configuration
 
@@ -48,4 +47,4 @@ endif()
 
 find_package(ASSIMP REQUIRED)
 
-add_executable(CUDA-kdtree-demo src/main.cpp)
+add_executable(CUDA-kdtree src/main.cpp)

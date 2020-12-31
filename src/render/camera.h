@@ -2,18 +2,11 @@
 
 #include <math.h>
 #include <iostream>
+
 #include "glincludes.h"
 
-namespace Cluster {
-
-enum CamMove
+namespace CuKee
 {
-    CM_move_forward  = 3,
-    CM_move_backward = 4,
-    CM_turn_cw       = 5,
-    CM_turn_ccw      = 6
-};
-
 class Camera
 {
 public:
@@ -21,6 +14,14 @@ public:
     Camera(const float x, const float y, const float z);
     Camera(const glm::vec3 position);
     ~Camera() = default;
+
+    enum Movement
+    {
+        FORWARD  = 3,
+        MOVE_BACKWARD = 4,
+        TURN_CW      = 5,
+        TURN_CCW      = 6
+    };
 
     void update_project_transform(glm::mat4& mat) const noexcept;
     void update_view_transform(glm::mat4& mat) const noexcept;
@@ -46,6 +47,7 @@ private:
     float m_fovy;
     float m_near_plane = 0.1f;
     float m_far_plane = 100.0f;
+
     glm::vec2 m_screenspace_bottomleft_coordinate = glm::vec2(-1);
     glm::vec2 m_screenspace_top_coordinate = glm::vec2(1);
 

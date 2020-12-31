@@ -1,7 +1,7 @@
 
 #include "camera.h"
 
-namespace Cluster
+namespace CuKee
 {
 Camera::Camera():
 m_eye(0.0f, 0.5f, 0.0f),

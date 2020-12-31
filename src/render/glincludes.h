@@ -8,8 +8,10 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "debug.h"
+#include "gldebug.h"
 
+namespace CuKee
+{
 struct color_t
 {
     int r;
@@ -27,10 +29,12 @@ class GLMatrices
 public:
     GLMatrices(){};
     ~GLMatrices() = default;
-    
+
     glm::mat4 projection;
     glm::mat4 model;
     glm::mat4 view;
     GLuint    MatrixID;
     GLuint    Tr;
 };
+
+}
