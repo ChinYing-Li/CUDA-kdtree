@@ -47,5 +47,3 @@ endif()
 # General dependencies
 
 find_package(ASSIMP REQUIRED)
-
-add_executable(CUDA-kdtree-demo src/main.cpp)

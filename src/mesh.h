@@ -1,46 +1,48 @@
 #pragma once
 
-#include "globject.h"
-// Forward declarations
-namespace objl
-{
-class Loader; class Material; class Mesh;
-}
+#include <map>
+#include "glincludes.h"
+#include "aabb.h"
+#include "obj.h"
 
-namespace Cluster{
-class GameData;
+namespace CuKee
+{
 
 /*
- *
+ * TODO: refactor Mesh; do not inherit from GLObject.
+ * Use more buffer object to reduce copying.
+ * Make this a light weight and renderable version of objloader's implementation?
  */
-class Mesh final : public GLObejct
+class Mesh
 {
 public:
-    Mesh(objl::Mesh& mesh, std::shared_ptr<GameData> data_ptr, unsigned int num_instance);
-    ~Mesh() = default;
+    Mesh(obj* mesh);
+    Mesh() = delete;
+    ~Mesh();
+    unsigned int get_vbo_size() const { return m_vbo_size; }
+    unsigned int get_nbo_size() const { return m_nbo_size; }
+    unsigned int get_cbo_size() const { return m_cbo_size; }
+    unsigned int get_ibo_size() const { return m_ibo_size; }
+    unsigned int get_tbo_size() const { return m_tbo_size; }
 
-    void draw(GLuint& shaderID) override;
+    const std::vector<float>& get_vbo_readonly() const { return m_vbo; }
+    const std::vector<float>& get_nbo_readonly() const { return m_nbo; }
+    const std::vector<float>& get_cbo_readonly() const { return m_cbo; }
+    const std::vector<int>& get_ibo_readonly() const { return m_ibo; }
 
-    std::string name;
-    void send_instance_matrices(std::vector<glm::mat4>& instance_models) override;
-
+    AABB m_bounding_box; // Perhaps make this a unique_ptr as well...but a lot of overhead
 private:
-    unsigned int m_numinstance;
-    void init(objl::Mesh& mesh);
-    void draw_textures(GLuint shaderID);
-    void set_material_uniform(GLuint& shaderID);
+    unsigned int m_vbo_size; // Vertex buffer
+    unsigned int m_nbo_size; // Normal buffer
+    unsigned int m_cbo_size; // Color buffer
+    unsigned int m_ibo_size; // Index buffer
+    unsigned int m_tbo_size; // Texture buffer
 
-    objl::Material* m_material_ptr = nullptr;
-    std::map<std::string, std::shared_ptr<Texture>> map_ptrs;
-    std::vector<bool> use_maps;
-
-/*map_Ka_ptr -->GL_TEXTURE0
-map_Kd_ptr = nullptr; GL_TEXTURE1
-map_Ks_ptr = nullptr; GL_TEXTURE2
-map_Ns_ptr = nullptr;GL_TEXTURE3
-map_d_ptr = nullptr; GL_TEXTURE4
-map_bump_ptr = nullptr; GL_TEXTURE5*/
+    std::vector<float> m_vbo;
+    std::vector<float> m_nbo;
+    std::vector<float> m_cbo;
+    std::vector<int> m_ibo;
+    std::vector<float> m_tbo;
 };
-
-} // namespace Cluster
+}
 
