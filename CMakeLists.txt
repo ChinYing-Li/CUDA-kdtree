@@ -47,3 +47,4 @@ endif()
 # General dependencies
 
 find_package(ASSIMP REQUIRED)
+find_package(BOOST REQUIRED)

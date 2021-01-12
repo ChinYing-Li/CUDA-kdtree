@@ -21,7 +21,11 @@ init_leaf(int *primitive_counts, int num_primitive, std::vector<int> *primitive_
   }
   else
   {
-
+    m_primitive_indices_offset = primitive_indices->size();
+    for (int i = 0; i < num_primitive; ++i)
+    {
+      primitive_indices->push_back(primitive_counts[i]);
+    }
   }
 }
 

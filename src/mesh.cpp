@@ -25,4 +25,9 @@ Mesh(obj* object):
 Mesh::~Mesh()
 {}
 
-} // namespace Cluster
+DeviceMesh Mesh::to_device()
+{
+  DeviceMesh dmesh;
+  dmesh.m_vbo = thrust::raw_pointer_cast(&m_vbo[0]);
+}
+} // namespace CuKee

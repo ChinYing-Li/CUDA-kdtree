@@ -24,7 +24,7 @@ public:
     float m_split;
     int m_one_primitive;
     int m_primitive_indices_offset;
-  };
+  }; // 4 bytes
 
 private:
 
@@ -33,7 +33,7 @@ private:
     int m_flags; /* Parameter used by both kinds of KDNode */
     int m_num_primitive;
     int m_child_above;
-  };
+  }; // 4 bytes
 };
 
 }
