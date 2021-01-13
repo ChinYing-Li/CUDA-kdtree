@@ -1,4 +1,6 @@
 set(SOURCES
+    geometry/mesh_aabb.cu
+    geometry/mesh_aabb.h
     kdtreeCPU/kdnode.cpp
     kdtreeCPU/kdnode.h
     kdtreeCPU/kdtreecpu.cpp

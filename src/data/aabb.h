@@ -4,6 +4,7 @@
 
 #include <thrust/device_vector.h>
 
+
 namespace CuKee
 {
 // Forward declaration
@@ -42,6 +43,9 @@ struct ArrAABB
   void clear();
   void resize(unsigned int size);
   void copy(const ArrAABB& rhs);
+  void set(unsigned int index, const float3  min_vert, const float3  max_vert);
+  void set(unsigned int index, const float3* min_vert, const float3* max_vert);
+
   DeviceArrAABB to_device();
 
   AABB2iter begin();
@@ -51,6 +55,31 @@ struct ArrAABB
   thrust::device_vector<float3> m_max_vert;
 };
 
+/*
+ * Reduce two AABB into one
+ */
+struct Reduce
+{
+  __device__
+  AABBinstance operator()(const AABBinstance& lhs, const AABBinstance& rhs)
+  {
+    float3 lhs_min_vert = thrust::get<0>(lhs);
+    float3 lhs_max_vert = thrust::get<1>(lhs);
+    float3 rhs_min_vert = thrust::get<0>(rhs);
+    float3 rhs_max_vert = thrust::get<1>(rhs);
+
+    float3 max_vert;
+    float3 min_vert;
+    min_vert.x = thrust::min(lhs_min_vert.x, rhs_min_vert.x);
+    min_vert.y = thrust::min(lhs_min_vert.y, rhs_min_vert.y);
+    min_vert.z = thrust::min(lhs_min_vert.z, rhs_min_vert.z);
+    max_vert.x = thrust::max(lhs_max_vert.x, rhs_max_vert.x);
+    max_vert.y = thrust::max(lhs_max_vert.y, rhs_max_vert.y);
+    max_vert.z = thrust::max(lhs_max_vert.z, rhs_max_vert.z);
+    return thrust::make_tuple(min_vert, max_vert);
+  }
+};
+
 /****************************************************************************************
  * Struct of Array - AABB (GPU-based)
  */
@@ -58,5 +87,6 @@ struct DeviceArrAABB
 {
   float3* m_min_vert;
   float3* m_max_vert;
+  int m_length;
 };
 }

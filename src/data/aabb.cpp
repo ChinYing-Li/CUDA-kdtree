@@ -1,7 +1,12 @@
+#include <thrust/copy.h>
+
 #include "aabb.h"
 
 namespace CuKee
 {
+/****************************************************************************************
+ * AABB
+ */
 AABB::
 AABB():
   m_min_vert(0.0f),
@@ -75,6 +80,38 @@ max_vert_distance(const AABB &box) const noexcept
   res = std::max(res, std::abs(m_max_vert.y - box.m_max_vert.y));
   res = std::max(res, std::abs(m_max_vert.z - box.m_max_vert.z));
   return res;
+}
+
+/****************************************************************************************
+ * ArrAABB
+ */
+
+inline unsigned int ArrAABB::
+size() const noexcept
+{
+  return m_max_vert.size();
+}
+
+inline void ArrAABB::
+clear()
+{
+  m_min_vert.clear();
+  m_max_vert.clear();
+}
+
+inline void ArrAABB::
+resize(unsigned int size)
+{
+  m_min_vert.resize(size);
+  m_max_vert.resize(size);
+}
+
+inline void ArrAABB::
+copy(const ArrAABB &rhs)
+{
+  this->resize(rhs.size());
+  thrust::copy(m_min_vert.begin(), m_min_vert.end(), rhs.m_min_vert.begin());
+  thrust::copy(m_max_vert.begin(), m_max_vert.end(), rhs.m_max_vert.begin());
 }
 
 
