@@ -36,5 +36,7 @@ DeviceMesh Mesh::to_device()
 {
   DeviceMesh dmesh;
   dmesh.m_vbo = thrust::raw_pointer_cast(&m_vbo[0]);
+  dmesh.m_ibo = thrust::raw_pointer_cast(&m_ibo[0]);
+  return dmesh;
 }
 } // namespace CuKee

@@ -18,6 +18,10 @@ add_library(CUDA_KDTREE ${SOURCES})
 add_library(STB_IMAGE "ext/stb_image.cpp")
 add_library(OBJLOADER "ext/objloader.cpp")
 
+if(UNIX and not APPLE)
+    set(CUDA_SAMPLE_INCLUDE_DIRS "/usr/local/cuda/samples/common")
+endif()
+
 target_include_directories(CUDA_KDtree
     PUBLIC
     ${EXT_SOURCE_DIRS}
@@ -28,6 +32,7 @@ target_include_directories(CUDA_KDtree
     ${GLEW_INCLUDE_DIRS}
     ${GLFW3_INCLUDE_DIRS}
     ${BOOST_INCLUDE_DIRS}
+    ${CUDA_SAMPLE_INCLUDE_DIRS}
 )
 
 target_link_libraries(CUDA_KDtree
