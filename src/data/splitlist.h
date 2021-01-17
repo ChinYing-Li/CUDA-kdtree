@@ -7,26 +7,30 @@
 namespace CuKee
 {
 
-struct DeviceArrSplitList;
+struct DeviceSplitList
+{
+
+};
 
 /****************************************************************************************
  * Stores the data related to node-splitting
  */
-class ArrSplitList
+class SplitList
 {
 public:
-  ArrSplitList();
-  ~ArrSplitList();
+  SplitList();
+  ~SplitList();
 
-  void resize();
+  void resize(unsigned int size);
+  void clear();
   void split();
 
-  DeviceArrSplitList to_device();
+  DeviceSplitList to_device();
   void to_host(); // After some computation on device, pull the updated result back to host
 
-private:
+protected:
   bool m_on_device;
-  DeviceArrSplitList* m_dev_list_ptr;
+  DeviceSplitList* m_dev_list_ptr;
 
   thrust::device_vector<int> m_split_offset;
   thrust::device_vector<int> m_split_axis;
@@ -34,8 +38,5 @@ private:
 
 };
 
-struct DeviceArrSplitList
-{
 
-};
 }
