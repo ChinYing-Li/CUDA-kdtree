@@ -36,7 +36,7 @@ sort_prim(thrust::device_vector<bool>& res)
  *
  */
 void ChunkList::
-clip_prim(DeviceMesh& mesh, SplitList& splitlist)
+clip_prim(DeviceMesh& mesh, SplitCandidates& splitlist)
 {
 
 }

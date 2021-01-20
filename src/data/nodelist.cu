@@ -1,3 +1,5 @@
+#include <device_launch_parameters.h>
+
 #include "nodelist.h"
 
 namespace CuKee
@@ -44,7 +46,8 @@ resize_prim(unsigned int size)
 __global__
 void cut_empty_space()
 {
-
+  int index = blockDim.x * blockIdx.x + threadIdx.x;
+  // update the aabb of the node
 }
 
 void NodeList::

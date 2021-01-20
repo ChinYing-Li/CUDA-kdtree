@@ -14,7 +14,7 @@ struct DeviceNodeList
   int* m_prim_starting_indices;
   int* m_node_prim_num;
   int* m_prim_indices;
-  DeviceSplitList m_splitlist;
+  DeviceSplitData m_split_data;
   int* m_num_node;
   int* m_num_prim;
 };
@@ -40,15 +40,12 @@ protected:
 
   thrust::device_vector<int> m_left_child_indices;
   thrust::device_vector<int> m_right_child_indices;
+  thrust::device_vector<int> m_prim_indices;
   thrust::device_vector<int> m_starting_indices_in_prim;
   thrust::device_vector<int> m_node_prim_num;
   thrust::device_vector<int> m_node_depth;
 
-  thrust::device_vector<int> m_prim_indices;
-
-  friend SplitList;
-  SplitList m_splitlist;
-
+  SplitData m_splitdata;
 
   void update_starting_indices();
 };

@@ -31,7 +31,7 @@ public:
   void create_chunks_from_nodes();
   void chunk_reduce_aabb();
   void sort_prim(thrust::device_vector<bool>& res);
-  void clip_prim(DeviceMesh& mesh, SplitList& splitlist);
+  void clip_prim(DeviceMesh& mesh, SplitCandidates& splitlist);
   void count_prim_in_child();
 
   DeviceChunkList to_device();
@@ -43,8 +43,8 @@ private:
   ArrAABB m_chunk_aabbs;
   ArrAABB m_node_aabbs;
 
+  thrust::device_vector<int> m_node_index; // The index of the corresponding
   thrust::device_vector<int> m_chunk_size; // compute the start index of each chunk on the fly
-
 
 };
 
