@@ -10,7 +10,16 @@
 namespace CuKee
 {
 
-struct DeviceMesh;
+namespace Device {
+struct Mesh
+{
+  float3* m_vbo;
+  float3* m_nbo;
+  int3* m_ibo;  // Do the paddings ourselves??
+  DeviceArrAABB m_aabbs;
+  int m_length;
+};
+}
 
 /*
  * Use more buffer object to reduce copying.
@@ -42,7 +51,7 @@ public:
     const thrust::device_vector<float3>& get_cbo_readonly() const { return m_cbo; }
     const thrust::device_vector<int3>& get_ibo_readonly() const { return m_ibo; }
 
-    DeviceMesh to_device();
+    Device::Mesh to_device();
 
     AABB m_bounding_box;
 private:
@@ -57,15 +66,6 @@ private:
     thrust::device_vector<float3> m_cbo;
     thrust::device_vector<int3> m_ibo;
     thrust::device_vector<float2> m_tbo;
-};
-
-struct DeviceMesh
-{
-  float3* m_vbo;
-  float3* m_nbo;
-  int3* m_ibo;  // Do the paddings ourselves??
-  DeviceArrAABB m_aabbs;
-  int m_length;
 };
 }
 

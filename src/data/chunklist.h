@@ -10,13 +10,17 @@
 
 namespace CuKee
 {
-struct DeviceChunkList
+namespace Device
 {
-  DeviceArrAABB m_prim_aabbs;
-  DeviceArrAABB m_chunk_aabbs;
-  DeviceArrAABB m_node_aabbs;
-  DeviceNodeList m_nodelist;
+struct ChunkList
+{
+  Device::ArrAABB m_prim_aabbs;
+  Device::ArrAABB m_chunk_aabbs;
+  Device::ArrAABB m_node_aabbs;
+  Device::NodeList m_nodelist;
 };
+}
+
 
 class ChunkList final : public NodeList
 {
@@ -31,21 +35,16 @@ public:
   void create_chunks_from_nodes();
   void chunk_reduce_aabb();
   void sort_prim(thrust::device_vector<bool>& res);
-  void clip_prim(DeviceMesh& mesh, SplitCandidates& splitlist);
+  void clip_prim(Device::Mesh& mesh, Device::SplitCandidates& splitlist);
   void count_prim_in_child();
 
-  DeviceChunkList to_device();
+  Device::ChunkList to_device();
 
 private:
   unsigned int m_num_chunks;
-
-  ArrAABB m_prim_aabbs;
   ArrAABB m_chunk_aabbs;
-  ArrAABB m_node_aabbs;
-
   thrust::device_vector<int> m_node_index; // The index of the corresponding
   thrust::device_vector<int> m_chunk_size; // compute the start index of each chunk on the fly
-
 };
 
 

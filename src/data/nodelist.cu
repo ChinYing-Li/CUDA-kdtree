@@ -18,7 +18,7 @@ clear()
   m_starting_indices_in_prim.clear();
   m_node_prim_num.clear();
   m_prim_indices.clear();
-  m_splitlist.clear();
+  m_splitdata.clear();
 }
 
 inline void NodeList::
@@ -29,7 +29,8 @@ resize_node(unsigned int size)
   m_right_child_indices.resize(size);
   m_starting_indices_in_prim.resize(size);
   m_node_prim_num.resize(size);
-  m_splitlist.resize(size);
+  m_node_aabbs.resize(size);
+  m_splitdata.resize(size);
 }
 
 inline void NodeList::
@@ -37,6 +38,7 @@ resize_prim(unsigned int size)
 {
   m_num_prim = size;
   m_prim_indices.resize(size);
+  m_prim_aabbs.resize(size);
 }
 
 /****************************************************************************************
@@ -65,10 +67,18 @@ split_node()
 
 }
 
-inline DeviceNodeList NodeList::
+inline Device::NodeList NodeList::
 to_device()
 {
-
+  Device::NodeList dev_list;
+  dev_list.m_left_child_indices = thrust::raw_pointer_cast(&m_left_child_indices[0]);
+  dev_list.m_right_child_indices = thrust::raw_pointer_cast(&m_right_child_indices[0]);
+  dev_list.m_prim_starting_indices = thrust::raw_pointer_cast(&m_starting_indices_in_prim[0]);
+  dev_list.m_node_prim_num = thrust::raw_pointer_cast(&m_node_prim_num[0]);
+  dev_list.m_prim_indices = thrust::raw_pointer_cast(&m_prim_indices[0]);
+  dev_list.m_prim_aabb = m_prim_aabbs.to_device();
+  dev_list.m_node_aabb = m_node_aabbs.to_device();
+  // TODO: m_num_node & m_num_prim
 }
 
 

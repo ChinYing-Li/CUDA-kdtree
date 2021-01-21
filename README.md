@@ -15,9 +15,9 @@ in this paper: [Real-Time KD-Tree Construction on Graphics Hardware. K. Zhou, Q.
  - [CMake > v3.17]()
  - [GLEW](http://glew.sourceforge.net/)
  - [GLFW](https://www.glfw.org/](https://www.glfw.org/))
- - [GLM](https://glm.g-truc.net/0.9.9/index.html)
+ - [GLM > 0.9.2](https://glm.g-truc.net/0.9.9/index.html)
  - [Doxygen](https://www.doxygen.nl/index.html)
- - [CUDA Library]()
+ - [CUDA Toolkit](https://docs.nvidia.com/cuda/index.html)
  
 ## Optional dependencies
 

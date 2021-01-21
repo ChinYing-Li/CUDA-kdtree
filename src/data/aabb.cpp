@@ -114,5 +114,13 @@ copy(const ArrAABB &rhs)
   thrust::copy(m_max_vert.begin(), m_max_vert.end(), rhs.m_max_vert.begin());
 }
 
+inline Device::ArrAABB ArrAABB::
+to_device()
+{
+  Device::ArrAABB dev_aabb;
+  dev_aabb.m_max_vert = thrust::raw_pointer_cast(&m_max_vert[0]);
+  dev_aabb.m_min_vert = thrust::raw_pointer_cast(&m_min_vert[0]);
+  return dev_aabb;
+}
 
 }

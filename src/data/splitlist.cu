@@ -6,8 +6,42 @@
 
 namespace CuKee
 {
+
+namespace Device
+{
+void Device::SplitData::
+clear()
+{
+  delete [] m_split_offset;
+  delete [] m_split_size;
+  delete [] m_split_axis;
+  delete [] m_split_position;
+}
+
+void Device::SplitData::resize(unsigned int size)
+{
+
+}
+}
+
+void SplitData::clear()
+{
+  m_split_first_indices.clear();
+  m_split_size.clear();
+  m_split_axis.clear();
+  m_split_position.clear();
+}
+
+void SplitData::resize(unsigned int size)
+{
+  m_split_first_indices.resize(size);
+  m_split_size.resize(size);
+  m_split_axis.resize(size);
+  m_split_position.resize(size);
+}
+
 __global__
-void cu_split_small_nodes(DeviceChunkList chunklist, DeviceSplitCandidates splitcan)
+void cu_split_small_nodes(Device::ChunkList chunklist, Device::SplitCandidates splitcan)
 {
   __shared__ int num_prim;
   __shared__ int prim_starting_index;

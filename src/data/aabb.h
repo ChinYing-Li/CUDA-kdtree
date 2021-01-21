@@ -7,8 +7,19 @@
 
 namespace CuKee
 {
-// Forward declaration
-struct DeviceArrAABB;
+
+namespace Device
+{
+/****************************************************************************************
+ * Struct of Array - AABB (GPU-based)
+ */
+struct ArrAABB
+{
+  float3* m_min_vert;
+  float3* m_max_vert;
+  int m_length;
+};
+}
 
 /****************************************************************************************
  * Naive implementation of axis-aligned bounding box for CPU-based application
@@ -46,7 +57,7 @@ struct ArrAABB
   void set(unsigned int index, const float3  min_vert, const float3  max_vert);
   void set(unsigned int index, const float3* min_vert, const float3* max_vert);
 
-  DeviceArrAABB to_device();
+  Device::ArrAABB to_device();
 
   AABB2iter begin();
   AABB2iter end();
@@ -80,13 +91,5 @@ struct Reduce
   }
 };
 
-/****************************************************************************************
- * Struct of Array - AABB (GPU-based)
- */
-struct DeviceArrAABB
-{
-  float3* m_min_vert;
-  float3* m_max_vert;
-  int m_length;
-};
+
 }

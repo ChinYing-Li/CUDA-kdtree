@@ -39,13 +39,14 @@ struct SmallNodeList
   long long* m_prim_bits;
   long long* m_small_root;
   unsigned int* m_root_index;
+  Device::NodeList m_node_list;
 };
 
 __global__
-void compute_SAH(Device::SmallNodeList activelist, DeviceSplitCandidates splitcan);
+void compute_SAH(Device::SmallNodeList activelist, Device::SplitCandidates splitcan);
 
 __global__
-void preprocess(Device::SmallNodeList activelist, DeviceSplitCandidates splitcan);
+void preprocess(Device::SmallNodeList activelist, Device::SplitCandidates splitcan);
 }
 
 }

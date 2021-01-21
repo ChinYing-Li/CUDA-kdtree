@@ -8,23 +8,32 @@ namespace CuKee
 {
 class ChunkList;
 
-struct DeviceSplitData
+namespace Device {
+struct SplitData
 {
   int* m_split_offset;
   int* m_split_size;
   int* m_split_axis;
   float* m_split_position;
+
+  void clear();
+
+  void resize(unsigned int size)
+  {
+    // TODO: resize these members !
+  }
 };
 
-struct DeviceSplitCandidates
+struct SplitCandidates
 {
   int* m_prim_indices;
   int* m_starting_indices_in_prim; // indexing into array of primitives
   unsigned long long* m_left_prim_bitmask;
   unsigned long long* m_right_prim_bitmask;
   int* m_root_index;
-  DeviceSplitData m_split_data;
+  Device::SplitData m_split_data;
 };
+}
 
 /****************************************************************************************
  * Stores the data related to node-splitting
@@ -37,9 +46,12 @@ struct SplitData
   thrust::device_vector<int> m_split_axis;
   thrust::device_vector<float> m_split_position;
 
-  DeviceSplitData to_device()
+  void clear();
+  void resize(unsigned int size);
+
+  Device::SplitData to_device()
   {
-    DeviceSplitData split_data;
+    Device::SplitData split_data;
     split_data.m_split_offset = thrust::raw_pointer_cast(&m_split_first_indices[0]);
     split_data.m_split_size = thrust::raw_pointer_cast(&m_split_size[0]);
     split_data.m_split_axis = thrust::raw_pointer_cast(&m_split_axis[0]);
@@ -58,12 +70,12 @@ public:
   void clear();
   void split(ChunkList& list);
 
-  DeviceSplitCandidates to_device();
+  Device::SplitCandidates to_device();
   void to_host(); // After some computation on device, pull the updated result back to host
 
 protected:
   bool m_on_device;
-  DeviceSplitCandidates* m_dev_list_ptr;
+  Device::SplitCandidates* m_dev_list_ptr;
 
   SplitData m_split_data;
   thrust::device_vector<int> m_prim_indices;
