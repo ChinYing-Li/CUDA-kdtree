@@ -1,3 +1,5 @@
+#include <glm/glm.hpp>
+
 #include <device_launch_parameters.h>
 
 #include "smallnode.h"
@@ -10,8 +12,6 @@ void SmallNodeList::resize(unsigned int node_size)
   m_small_root.resize(node_size);
   m_root_index.resize(node_size);
 }
-
-
 
 Device::SmallNodeList SmallNodeList::to_device()
 {
@@ -41,8 +41,8 @@ void preprocess(Device::SmallNodeList& activelist, Device::SplitCandidates& spli
   __shared__ int node_split_starting_index;
   __shared__ int num_prim;
   __shared__ int prim_starting_index;
-  __shared__ float3 prim_min_vert[64];
-  __shared__ float3 prim_max_vert[64];
+  __shared__ glm::vec3 prim_min_vert[64];
+  __shared__ glm::vec3 prim_max_vert[64];
 
   int split_offset = threadIdx.x;
   if (split_offset == 0)
@@ -66,12 +66,12 @@ void preprocess(Device::SmallNodeList& activelist, Device::SplitCandidates& spli
  // Iterate through all the primitives (triangles)
  for (int i = 0; i < num_prim; ++i)
  {
-   bool is_on_left = prim_max_vert[i][split_axis] ;
+   bool is_on_left = prim_max_vert[i][split_axis] < split_pos;
+   bool is_on_right = prim_min_vert[i][split_axis] > split_pos;
+   splitcan.m_left_prim_bitmask[node_split_starting_index + split_offset] |= is_on_left << i;
+   splitcan.m_right_prim_bitmask[node_split_starting_index + split_offset] |= is_on_right << i;
  }
-
- splitcan.m_left_prim_bitmask[node_split_starting_index + split_offset] = 0;
- splitcan.m_right_prim_bitmask[node_split_starting_index + split_offset] = 0;
-
+  __syncthreads();
 }
 
 __global__

@@ -5,17 +5,181 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-#include <helper_cuda.h>
 
-#include "src/kdtreeGPU/reduction.h"
-#include "src/kdtreeGPU/sharedmemory.h"
+#include "src/data/kernel/reduction.h"
+#include "src/utils/sharedmemory.h"
 #include "src/utils/cuda_common.h"
 
+/*
+ * Various kernels for reduction.
+ * See https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf
+ */
+template <unsigned int block_size, typename T, class Op>
+__inline__ __device__
+T block_reduce_1(T* input)
+{
+  extern __shared__ T shared_data[block_size];
+  unsigned int thread = threadIdx.x;
+  unsigned int index = blockIdx.x * blockDim.x + thread;
+  shared_data[thread] = input[index];
+  __syncthreads();
 
+  // I think blockDim.x should be equal to block_size
+  for(unsigned int s = 1; s < blockDim.x; ++s)
+  {
+    if(thread % (2*s) == 0)
+    {
+
+      shared_data[thread] = Op::op(shared_data[thread], shared_data[thread + s]);
+    }
+    __syncthreads();
+  }
+  if (thread == 0)
+  {
+    return shared_data[thread];
+  }
+}
+
+/*
+ * Interleaved addressing, which leads to bank conflict
+ */
+template <unsigned int block_size, typename T, class Op>
+__inline__ __device__
+T block_reduce_2(T* input)
+{
+  extern __shared__ T shared_data[block_size];
+  unsigned int thread = threadIdx.x;
+  unsigned int index = blockIdx.x * blockDim.x + thread;
+  shared_data[thread] = input[index];
+  __syncthreads();
+
+  for (unsigned int s = 1; s < block_size; ++s)
+  {
+    int current = 2 * thread * s;
+    if (current + s < block_size)
+    {
+      shared_data[current] = Op::op(shared_data[thread], shared_data[thread + s]);
+    }
+    __syncthreads();
+  }
+  if (thread == 0)
+  {
+    return shared_data[thread];
+  }
+}
+
+/*
+ * Sequential addressing
+ */
+template <unsigned int block_size, typename T, class Op>
+__inline__ __device__
+T block_reduce_3(T* input)
+{
+  extern __shared__ T shared_data[block_size];
+  unsigned int thread = threadIdx.x;
+  unsigned int index = blockIdx.x * blockDim.x + thread;
+  shared_data[thread] = input[index];
+  __syncthreads();
+
+  // Half of the threads are idle on the first loop iteration
+  for (unsigned int s = block_size / 2; s > 0; s >>= 1)
+  {
+   if (thread < s)
+   {
+     shared_data[thread] = Op::op(shared_data[thread], shared_data[thread + s]);
+   }
+    __syncthreads();
+  }
+  if (thread == 0)
+  {
+    return shared_data[thread];
+  }
+}
+
+/*
+ * Sequential addressing and first reduction outside the loop
+ * Halve block_size (== blockDim.x) in the template
+ * TODO: why do we even need this first template parameter?
+ */
+template <unsigned int halved_block_size, typename T, class Op>
+__inline__ __device__
+T block_reduce_4(T* input)
+{
+  extern __shared__ T shared_data[halved_block_size];
+  unsigned int thread = threadIdx.x;
+  unsigned int index = blockIdx.x * blockDim.x * 2 + thread;
+  shared_data[thread] = input[index] + input[index + halved_block_size];
+  __syncthreads();
+
+  // Half of the threads are idle on the first loop iteration
+  for (unsigned int s = block_size / 2; s > 0; s >>= 1)
+  {
+   if (thread < s)
+   {
+     shared_data[thread] = Op::op(shared_data[thread], shared_data[thread + s]);
+   }
+    __syncthreads();
+  }
+
+  if (thread == 0)
+  {
+    return shared_data[thread];
+  }
+}
+
+/*
+ * When s <= 32, only one warp (unit for SIMD) exists.
+ * Unroll the last six loop by defining "warp_reduce".
+ * Use the volatile keyword, according to
+ * https://stackoverflow.com/questions/15331009/when-to-use-volatile-with-shared-cuda-memory
+ */
+template <typename T>
+__device__
+void warp_reduce(volatile T* shared_data, int thread)
+{
+  shared_data[thread] += shared_data[thread + 32];
+  shared_data[thread] += shared_data[thread + 16];
+  shared_data[thread] += shared_data[thread +  8];
+  shared_data[thread] += shared_data[thread +  4];
+  shared_data[thread] += shared_data[thread +  2];
+  shared_data[thread] += shared_data[thread +  1];
+}
+
+// TODO: the return type is incorrect
+template <unsigned int halved_block_size, typename T, class Op>
+__inline__ __device__
+T block_reduce_5(T* input)
+{
+  extern __shared__ T shared_data[halved_block_size];
+  unsigned int thread = threadIdx.x;
+  unsigned int index = blockIdx.x * blockDim.x * 2 + thread;
+  shared_data[thread] = input[index] + input[index + halved_block_size];
+  __syncthreads();
+
+  for (unsigned int s = block_size / 2; s > 32; s >>= 1)
+  {
+   if (thread < s)
+   {
+     shared_data[thread] = Op::op(shared_data[thread], shared_data[thread + s]);
+   }
+    __syncthreads();
+  }
+
+  if (thread < 32)
+  {
+    warp_reduce(shared_data, thread);
+  }
+  __syncthread();
+
+  if (thread == 0)
+  {
+    return shared_data[thread];
+  }
+}
 
 template <typename T, class Op>
 __global__
-void cu_segmented_reduce_1(T *val,
+void segmented_reduce_1(T *val,
                          unsigned int num_val,
                          int* keys,
                          unsigned int num_keys,
@@ -28,8 +192,8 @@ void cu_segmented_reduce_1(T *val,
 
   int min_key = key_ranges[2 * blockIdx.x];
   int key_diff = key_ranges[2 * blockIdx.x + 1] - min_key;
-  int thread = threadIdx.x;
-  int index = blockIdx.x * blockDim.x + thread;
+  unsigned int thread = threadIdx.x;
+  unsigned int index = blockIdx.x * blockDim.x + thread;
 
   s_val[thread] = val[thread];
   s_key[thread] = keys[thread];
@@ -116,7 +280,7 @@ void segmented_reduce(T *val,
  */
 template <typename T, class Op, unsigned int chunk_size>
 __global__
-void cu_chunk_reduce(T* val,
+void chunk_reduce(T* val,
                      int* starting_indices,
                      int* chunk_len,
                      T* output)
@@ -124,9 +288,14 @@ void cu_chunk_reduce(T* val,
   T* s_arr = SharedMemory<T>();
   unsigned int thread = threadIdx.x;
   unsigned int chunk_index = blockIdx.x;
-  unsigned int starting_index = starting_indices[chunk_index];
-  unsigned int len = chunk_len[chunk_index];
+  __shared__ unsigned int starting_index;
+  __shared__ unsigned int len;
 
+  if (thread == 0)
+  {
+    starting_index = starting_indices[chunk_index];
+    len = chunk_len[chunk_index];
+  }
   __syncthreads();
 
   if (thread < len) // Branching?
@@ -156,5 +325,5 @@ void chunk_reduce(T* val, int* starting_indices,
   dim3 block_dim = dim3(chunk_size, 1, 1);
   dim3 grid_dim = dim3(num_chunks, 1, 1);
   int size = chunk_size * sizeof (T);
-  cu_chunk_reduce<T, Op, chunk_size> <<<>>>();
+  chunk_reduce<T, Op, chunk_size> <<<block_dim, grid_dim>>>(val, starting_indices, chunk_len, output);
 }

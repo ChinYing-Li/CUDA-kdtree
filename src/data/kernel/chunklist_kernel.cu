@@ -24,13 +24,13 @@ namespace CuKee
    * Transform the "un-chunkified" chunklist
    */
   __global__
-  void cu_create_chunk_from_nodes(DeviceChunkList& chunklist)
+  void cu_create_chunk_from_nodes(Device::ChunkList& chunklist)
   {
 
   }
 
   __global__
-  void cu_sort_prim(DeviceChunkList& activelist,
+  void sort_prim(Device::ChunkList& activelist,
                     unsigned int num_prim,
                     int* tags)
   {

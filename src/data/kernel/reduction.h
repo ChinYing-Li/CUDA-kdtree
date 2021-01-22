@@ -23,7 +23,7 @@ void chunk_reduce(T* val, int* starting_indices,
 // Unsegmented reduction on GPU
 template <typename T, class Op, unsigned int block_size>
 __device__
-T cu_reduce(T* val);
+T reduce(T* val);
 
 /****************************************************************************************
  * Operators for reduction

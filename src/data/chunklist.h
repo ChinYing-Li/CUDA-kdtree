@@ -14,9 +14,12 @@ namespace Device
 {
 struct ChunkList
 {
-  Device::ArrAABB m_prim_aabbs;
+  int* m_node_chunk_starting_indices;
+  int* m_num_chunk_per_node;
+  int* m_chunk_prim_starting_indices;
+  int* m_num_prim_per_chunk;
+  int* m_result_keys;
   Device::ArrAABB m_chunk_aabbs;
-  Device::ArrAABB m_node_aabbs;
   Device::NodeList m_nodelist;
 };
 }
@@ -35,7 +38,7 @@ public:
   void create_chunks_from_nodes();
   void chunk_reduce_aabb();
   void sort_prim(thrust::device_vector<bool>& res);
-  void clip_prim(Device::Mesh& mesh, Device::SplitCandidates& splitlist);
+  void clip_prim(Device::Mesh& mesh, Device::SplitData& split_data);
   void count_prim_in_child();
 
   Device::ChunkList to_device();
@@ -43,8 +46,14 @@ public:
 private:
   unsigned int m_num_chunks;
   ArrAABB m_chunk_aabbs;
-  thrust::device_vector<int> m_node_index; // The index of the corresponding
-  thrust::device_vector<int> m_chunk_size; // compute the start index of each chunk on the fly
+
+  // per node members
+  thrust::device_vector<int> m_node_chunk_starting_indices; // The index of the corresponding
+  thrust::device_vector<int> m_num_chunk_per_node; // compute the start index of each chunk on the fly
+  // per chunk members
+  thrust::device_vector<int> m_num_prim_per_chunk;
+  thrust::device_vector<int> m_chunk_prim_starting_indices;
+  thrust::device_vector<int> m_result_keys;
 };
 
 

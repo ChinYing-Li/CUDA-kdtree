@@ -8,19 +8,6 @@
 namespace CuKee
 {
 
-namespace Device
-{
-/****************************************************************************************
- * Struct of Array - AABB (GPU-based)
- */
-struct ArrAABB
-{
-  float3* m_min_vert;
-  float3* m_max_vert;
-  int m_length;
-};
-}
-
 /****************************************************************************************
  * Naive implementation of axis-aligned bounding box for CPU-based application
  */
@@ -38,6 +25,19 @@ public:
   glm::vec3 m_min_vert;
   glm::vec3 m_max_vert;
 };
+
+namespace Device
+{
+/****************************************************************************************
+ * Struct of Array - AABB (GPU-based)
+ */
+struct ArrAABB
+{
+  glm::vec3* m_min_vert;
+  glm::vec3* m_max_vert;
+  int m_length;
+};
+}
 
 /****************************************************************************************
  * Struct of Array - AABB (CPU-based)
@@ -62,12 +62,12 @@ struct ArrAABB
   AABB2iter begin();
   AABB2iter end();
 
-  thrust::device_vector<float3> m_min_vert;
-  thrust::device_vector<float3> m_max_vert;
+  thrust::device_vector<glm::vec3> m_min_vert;
+  thrust::device_vector<glm::vec3> m_max_vert;
 };
 
 /*
- * Reduce two AABB into one
+ * Reduce two AABB into one. TODO: We have to modify the kernels as well.
  */
 struct Reduce
 {
