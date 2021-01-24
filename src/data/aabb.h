@@ -33,8 +33,8 @@ namespace Device
  */
 struct ArrAABB
 {
-  glm::vec3* m_min_vert;
-  glm::vec3* m_max_vert;
+  glm::vec4* m_min_vert;
+  glm::vec4* m_max_vert;
   int m_length;
 };
 }
@@ -43,9 +43,9 @@ struct ArrAABB
  * Struct of Array - AABB (CPU-based)
  */
 
-using AABBinstance = thrust::tuple<float3, float3>;
-using f3iter = thrust::device_vector<float3>::iterator;
-using AABBitertuple = thrust::tuple<f3iter, f3iter>;
+using AABBinstance = thrust::tuple<glm::vec4, glm::vec4>;
+using v4iter = thrust::device_vector<glm::vec4>::iterator;
+using AABBitertuple = thrust::tuple<v4iter, v4iter>;
 using AABB2iter = thrust::zip_iterator<AABBitertuple>;
 
 struct ArrAABB
@@ -62,8 +62,8 @@ struct ArrAABB
   AABB2iter begin();
   AABB2iter end();
 
-  thrust::device_vector<glm::vec3> m_min_vert;
-  thrust::device_vector<glm::vec3> m_max_vert;
+  thrust::device_vector<glm::vec4> m_min_vert;
+  thrust::device_vector<glm::vec4> m_max_vert;
 };
 
 /*
@@ -74,13 +74,13 @@ struct Reduce
   __device__
   AABBinstance operator()(const AABBinstance& lhs, const AABBinstance& rhs)
   {
-    float3 lhs_min_vert = thrust::get<0>(lhs);
-    float3 lhs_max_vert = thrust::get<1>(lhs);
-    float3 rhs_min_vert = thrust::get<0>(rhs);
-    float3 rhs_max_vert = thrust::get<1>(rhs);
+    glm::vec4 lhs_min_vert = thrust::get<0>(lhs);
+    glm::vec4 lhs_max_vert = thrust::get<1>(lhs);
+    glm::vec4 rhs_min_vert = thrust::get<0>(rhs);
+    glm::vec4 rhs_max_vert = thrust::get<1>(rhs);
 
-    float3 max_vert;
-    float3 min_vert;
+    glm::vec4 max_vert;
+    glm::vec4 min_vert;
     min_vert.x = thrust::min(lhs_min_vert.x, rhs_min_vert.x);
     min_vert.y = thrust::min(lhs_min_vert.y, rhs_min_vert.y);
     min_vert.z = thrust::min(lhs_min_vert.z, rhs_min_vert.z);

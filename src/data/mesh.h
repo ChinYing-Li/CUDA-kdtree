@@ -16,7 +16,7 @@ struct Mesh
   float3* m_vbo;
   float3* m_nbo;
   int3* m_ibo;  // Do the paddings ourselves??
-  DeviceArrAABB m_aabbs;
+  Device::ArrAABB m_aabbs;
   int m_length;
 };
 }
@@ -46,10 +46,10 @@ public:
     unsigned int get_ibo_size() const { return m_ibo_size; }
     unsigned int get_tbo_size() const { return m_tbo_size; }
 
-    const thrust::device_vector<float3>& get_vbo_readonly() const { return m_vbo; }
-    const thrust::device_vector<float3>& get_nbo_readonly() const { return m_nbo; }
-    const thrust::device_vector<float3>& get_cbo_readonly() const { return m_cbo; }
-    const thrust::device_vector<int3>& get_ibo_readonly() const { return m_ibo; }
+    const thrust::device_vector<glm::vec4>& get_vbo_readonly() const { return m_vbo; }
+    const thrust::device_vector<glm::vec4>& get_nbo_readonly() const { return m_nbo; }
+    const thrust::device_vector<glm::vec4>& get_cbo_readonly() const { return m_cbo; }
+    const thrust::device_vector<glm::ivec4>& get_ibo_readonly() const { return m_ibo; }
 
     Device::Mesh to_device();
 
@@ -61,11 +61,11 @@ private:
     unsigned int m_ibo_size; // Index buffer
     unsigned int m_tbo_size; // Texture buffer
 
-    thrust::device_vector<float3> m_vbo;
-    thrust::device_vector<float3> m_nbo;
-    thrust::device_vector<float3> m_cbo;
-    thrust::device_vector<int3> m_ibo;
-    thrust::device_vector<float2> m_tbo;
+    thrust::device_vector<glm::vec4> m_vbo;
+    thrust::device_vector<glm::vec4> m_nbo;
+    thrust::device_vector<glm::vec4> m_cbo;
+    thrust::device_vector<glm::ivec4> m_ibo;
+    thrust::device_vector<glm::vec2> m_tbo;
 };
 }
 

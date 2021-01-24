@@ -6,16 +6,19 @@
 #include "src/data/mesh.h"
 #include "src/data/nodelist.h"
 
-#define MAX_PRIMITIVE_PER_CHUNK 256
-
 namespace CuKee
 {
+const int MAX_PRIM_PER_CHUNK = 256;
+const int MAX_RPIM_PER_CHUNK_LOG2 = 8;
+const float EMPTY_REMOVAL_THRES = 0.25;
+
 namespace Device
 {
 struct ChunkList
 {
   int* m_node_chunk_starting_indices;
   int* m_num_chunk_per_node;
+  int* m_node_indices;
   int* m_chunk_prim_starting_indices;
   int* m_num_prim_per_chunk;
   int* m_result_keys;
@@ -52,9 +55,9 @@ private:
   thrust::device_vector<int> m_num_chunk_per_node; // compute the start index of each chunk on the fly
   // per chunk members
   thrust::device_vector<int> m_num_prim_per_chunk;
+  thrust::device_vector<int> m_node_indices;
   thrust::device_vector<int> m_chunk_prim_starting_indices;
   thrust::device_vector<int> m_result_keys;
 };
-
 
 }

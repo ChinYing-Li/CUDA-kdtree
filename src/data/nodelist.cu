@@ -74,11 +74,14 @@ to_device()
   dev_list.m_left_child_indices = thrust::raw_pointer_cast(&m_left_child_indices[0]);
   dev_list.m_right_child_indices = thrust::raw_pointer_cast(&m_right_child_indices[0]);
   dev_list.m_prim_starting_indices = thrust::raw_pointer_cast(&m_starting_indices_in_prim[0]);
+  dev_list.m_node_depth = thrust::raw_pointer_cast(&m_node_depth[0]);
   dev_list.m_node_prim_num = thrust::raw_pointer_cast(&m_node_prim_num[0]);
   dev_list.m_prim_indices = thrust::raw_pointer_cast(&m_prim_indices[0]);
   dev_list.m_prim_aabb = m_prim_aabbs.to_device();
   dev_list.m_node_aabb = m_node_aabbs.to_device();
+  dev_list.m_parent_node_aabb = m_parent_node_aabbs.to_device();
   // TODO: m_num_node & m_num_prim
+  return dev_list;
 }
 
 

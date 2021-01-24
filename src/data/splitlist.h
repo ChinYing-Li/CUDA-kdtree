@@ -86,5 +86,9 @@ protected:
   // first_split_index -> What is this?
 };
 
-
+enum SplitSide
+{
+  LEFT = -1,
+  RIGHT = 1,
+};
 }

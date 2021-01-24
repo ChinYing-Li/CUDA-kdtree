@@ -14,9 +14,11 @@ struct NodeList
   int* m_right_child_indices;
   int* m_prim_starting_indices;
   int* m_node_prim_num;
+  int* m_node_depth;
   int* m_prim_indices;
   Device::ArrAABB m_prim_aabb;
   Device::ArrAABB m_node_aabb;
+  Device::ArrAABB m_parent_node_aabb;
   Device::SplitData m_split_data;
   int* m_num_node;
   int* m_num_prim;
@@ -44,6 +46,7 @@ protected:
   unsigned int m_num_prim;
   ArrAABB m_prim_aabbs;
   ArrAABB m_node_aabbs;
+  ArrAABB m_parent_node_aabbs;
   thrust::device_vector<int> m_left_child_indices;
   thrust::device_vector<int> m_right_child_indices;
   thrust::device_vector<int> m_prim_indices;
