@@ -1,13 +1,15 @@
 //OBJCORE- A Obj Mesh Library by Yining Karl Li
 //This file is part of OBJCORE, Coyright (c) 2012 Yining Karl Li
 
-#include <objUtil/objloader.h>
 #include <iomanip>
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <string.h>
+
 #include <glm/glm.hpp>
+
+#include "objloader.h"
 
 using namespace std;
 

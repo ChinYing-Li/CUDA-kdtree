@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 // Thrust Dependencies
 #include <thrust/device_ptr.h>
 #include <thrust/copy.h>
@@ -78,18 +76,18 @@ class ReductionOp_Min
   inline static __host__ __device__
   T op(const T& lhs, const T& rhs)
   {
-
+    return min(lhs, rhs);
   }
 
   inline static __host__ __device__
   T identity()
   {
-
+    return T(0);
   }
 
   inline static __host__ __device__
   int stride()
   {
-
+    return 1;
   }
 };

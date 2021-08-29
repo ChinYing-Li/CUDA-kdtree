@@ -1,14 +1,16 @@
-// GL Dependencies
-#include <glm/glm.hpp>
-
 // CUDA Dependencies
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-#include "src/data/kernel/reduction.h"
-#include "src/utils/sharedmemory.h"
-#include "src/utils/cuda_common.h"
+// GL Dependencies
+#define GLM_FORCE_CUDA
+#include <glm/glm.hpp>
+
+#include "data/kernel/reduction.h"
+#include "data/kernel/reduction_device.h"
+#include "utils/sharedmemory.h"
+#include "utils/cuda_common.h"
 
 /*
  * Various kernels for reduction.
@@ -112,7 +114,7 @@ T block_reduce_4(T* input)
   __syncthreads();
 
   // Half of the threads are idle on the first loop iteration
-  for (unsigned int s = block_size / 2; s > 0; s >>= 1)
+  for (unsigned int s = halved_block_size; s > 0; s >>= 1)
   {
    if (thread < s)
    {
@@ -156,7 +158,7 @@ T block_reduce_5(T* input)
   shared_data[thread] = input[index] + input[index + halved_block_size];
   __syncthreads();
 
-  for (unsigned int s = block_size / 2; s > 32; s >>= 1)
+  for (unsigned int s = halved_block_size; s > 32; s >>= 1)
   {
    if (thread < s)
    {
@@ -169,7 +171,7 @@ T block_reduce_5(T* input)
   {
     warp_reduce(shared_data, thread);
   }
-  __syncthread();
+  __syncthreads();
 
   if (thread == 0)
   {
@@ -270,9 +272,98 @@ void segmented_reduce(T *val,
   dim3 dim_block(num_threads, 1, 1);
   dim3 dim_grid(num_blocks, 1, 1);
   unsigned int sme_size = num_threads * 3 * sizeof (int); // What does this mean?
-  cu_segmented_reduce_1<T, Op><<<dim_grid, dim_block, sme_size>>>(val, num_val, keys, num_keys, keyranges, output);
+  segmented_reduce_1<T, Op><<<dim_grid, dim_block, sme_size>>>(val, num_val, keys, num_keys, keyranges, output);
   checkCudaError("Segmented reduction kernel call failed");
   cudaFree(keyranges);
+}
+
+template<typename T, class ReductionOp, unsigned int block_size>
+__inline__ __device__
+T reduction_device(T* arr)
+{
+  unsigned int thread = threadIdx.x;
+  if(block_size >= 512)
+  {
+    if(thread < 256)
+    {
+      arr[thread] = ReductionOp::op(arr[thread], arr[thread + 256]);
+    }
+    __syncthreads();
+  }
+
+  if(block_size >= 256)
+  {
+    if(thread < 128)
+    {
+      arr[thread] = ReductionOp::op(arr[thread], arr[thread + 128]);
+    }
+  }
+  __syncthreads();
+
+  if(block_size >= 128)
+  {
+    if(thread < 64)
+    {
+      arr[thread] = ReductionOp::op(arr[thread], arr[thread + 64]);
+    }
+  }
+  __syncthreads();
+
+  if(block_size >= 64)
+  {
+    if(thread < 32)
+    {
+      arr[thread] = ReductionOp::op(arr[thread], arr[thread + 32]);
+    }
+  }
+  __syncthreads();
+
+  if(block_size >= 32)
+  {
+    if(thread < 16)
+    {
+      arr[thread] = ReductionOp::op(arr[thread], arr[thread + 16]);
+    }
+  }
+  __syncthreads();
+
+  if(block_size >= 16)
+  {
+    if(thread < 8)
+    {
+      arr[thread] = ReductionOp::op(arr[thread], arr[thread + 8]);
+    }
+  }
+  __syncthreads();
+
+  if(block_size >= 8)
+  {
+    if(thread < 4)
+    {
+      arr[thread] = ReductionOp::op(arr[thread], arr[thread + 4]);
+    }
+  }
+  __syncthreads();
+
+  if(block_size >= 4)
+  {
+    if(thread < 2)
+    {
+      arr[thread] = ReductionOp::op(arr[thread], arr[thread + 2]);
+    }
+  }
+  __syncthreads();
+
+  if(block_size >= 2)
+  {
+    if(thread < 1)
+    {
+      arr[thread] = ReductionOp::op(arr[thread], arr[thread + 1]);
+    }
+  }
+  __syncthreads();
+
+  return arr[0];
 }
 
 /*
@@ -280,7 +371,7 @@ void segmented_reduce(T *val,
  */
 template <typename T, class Op, unsigned int chunk_size>
 __global__
-void chunk_reduce(T* val,
+void chunk_reduce_global(T* val,
                      int* starting_indices,
                      int* chunk_len,
                      T* output)
@@ -309,7 +400,8 @@ void chunk_reduce(T* val,
 
   __syncthreads();
 
-  T res = cu_reduce<T, Op, chunk_size>(s_arr);
+  // reduce
+  T res = reduction_device<T, Op, chunk_size>(s_arr);
 
   if (thread == 0)
   {

@@ -1,41 +1,58 @@
 set(SOURCES
-    geometry/mesh_aabb.cu
-    geometry/mesh_aabb.h
-    kdtreeCPU/kdnode.cpp
-    kdtreeCPU/kdnode.h
-    kdtreeCPU/kdtreecpu.cpp
-    kdtreeCPU/kdtreecpu.h
-    math/vector_type.cuh
-    render/camera.cpp
-    render/window.cpp
-    utils/timer.cpp
-    aabb.cpp
-    kdtree.cpp
-    mesh.cpp
+        data/kernel/reduction.cu
+        data/kernel/reduction_device.cu
+        data/kernel/scan.cu
+        data/kernel/utils.cu
+        data/aabb.cpp
+        data/chunklist.cpp
+        data/chunklist_kernel.cu
+        data/mesh.cpp
+        data/mesh_aabb.cu
+        data/nodelist.cu
+        data/smallnode.cu
+        data/smallnode_kernel.cu
+        data/splitlist.cu
+        kdtreeCPU/kdnode.cpp
+        kdtreeCPU/kdtreecpu.cpp
+        kdtreeGPU/kdtreegpu.cu
+        math/vector_type.cu
+        render/camera.cpp
+        render/window.cpp
+        utils/timer.cpp
+        kdtree.cpp
     )
 
-add_library(CUDA_KDTREE ${SOURCES})
-add_library(STB_IMAGE "ext/stb_image.cpp")
-add_library(OBJLOADER "ext/objloader.cpp")
+add_library(CUDA_KDTree ${SOURCES})
 
-if(UNIX and not APPLE)
+if(UNIX AND NOT APPLE)
     set(CUDA_SAMPLE_INCLUDE_DIRS "/usr/local/cuda/samples/common")
 endif()
 
-target_include_directories(CUDA_KDtree
+# Configure Thrust
+# thrust_create_target(Thrust)
+
+target_include_directories(CUDA_KDTree
     PUBLIC
     ${EXT_SOURCE_DIRS}
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CUDATookit_INCLUDE_DIRS}
-    ${OPENGL_INCLUDE_DIR}
-    ${GLEW_INCLUDE_DIRS}
-    ${GLFW3_INCLUDE_DIRS}
-    ${BOOST_INCLUDE_DIRS}
-    ${CUDA_SAMPLE_INCLUDE_DIRS}
+        ${PROJECT_SOURCE_DIR}/ext
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/data
+        ${CMAKE_CURRENT_SOURCE_DIR}/data/kernel
+        ${CMAKE_CURRENT_SOURCE_DIR}/kdtreeCPU
+        ${CMAKE_CURRENT_SOURCE_DIR}/kdtreeGPU
+        ${CMAKE_CURRENT_SOURCE_DIR}/math
+        ${CMAKE_CURRENT_SOURCE_DIR}/render
+        ${CMAKE_CURRENT_SOURCE_DIR}/utils
+        ${CUDATookit_INCLUDE_DIRS}
+        ${OPENGL_INCLUDE_DIR}
+        ${GLEW_INCLUDE_DIRS}
+        ${GLFW3_INCLUDE_DIRS}
+        ${BOOST_INCLUDE_DIRS}
+        ${CUDA_SAMPLE_INCLUDE_DIRS}
 )
 
-target_link_libraries(CUDA_KDtree
+target_link_libraries(CUDA_KDTree
     PRIVATE
     ${CUDAToolkit_LIBRARY_DIR}
     OpenGL::OpenGL
@@ -44,22 +61,24 @@ target_link_libraries(CUDA_KDtree
     ${GLFW3_LIBRARIES}
     ${BOOST_LIBRARIES}
     ASSIMP
-    ${STB_IMAGE}
     ${OBJLOADER}
+    Thrust
     )
 
-set_target_properties(TARGET CUDA_kdtree
-    PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(CUDA_KDTree
+    PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
-install(TARGETS CUDA_KDtree
+list(APPEND CUDA_NVCC_FLAG -Xcompiler)
+
+install(TARGETS CUDA_KDTree
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib)
 
 # Add main.cpp
-add_executable(CuKee_demo src/application.cpp)
-target_link_libraries(Cukee_demo
-                      CUDA_KDtree
+add_executable(CuKee_demo application.cpp)
+target_link_libraries(CuKee_demo
+                      CUDA_KDTree
                       )
 
 if(APPLE)

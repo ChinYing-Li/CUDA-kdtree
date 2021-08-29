@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.17)
 project(CUDA-kdtree
         VERSION 0.0.1
         DESCRIPTION "GPU-acclerated KD-tree using CUDA"
-        LANGUAGES CXX C CUDA)
+        LANGUAGES CUDA CXX)
 
 enable_testing()
 
@@ -37,16 +37,29 @@ find_package(GLM REQUIRED)
 # CUDA dependencies
 
 find_package(CUDAToolkit REQUIRED)
-find_library(NVTX_LIBRARY nvToolsExt PATHS ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
+find_library(CUDA_NVTX_LIBRARY
+        NAMES nvToolsExt nvTools
+        PATHS ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 
-set(PROFILE_MODE OFF)
-if(NVTX_LIBRARY)
-    message(STATUS "NVIDIA Extension Library not found; can't profile with it.")
-    set(PROFILE_MODE ON)
+set(PROFILE_MODE ON)
+if(NOT CUDA_NVTX_LIBRARY)
+    message(STATUS "NVIDIA Extension Library not found.")
+    set(PROFILE_MODE OFF)
 endif()
+
+###############################################################################
+# CUDA CMake variables
+set(CMAKE_CUDA_FLAGS "-Wall")
 
 ###############################################################################
 # General dependencies
 
 find_package(ASSIMP REQUIRED)
-find_package(BOOST REQUIRED)
+find_package(Boost REQUIRED)
+
+###############################################################################
+# Progress to other sources
+
+add_subdirectory(ext)
+add_subdirectory(src)
+add_subdirectory(tests)
