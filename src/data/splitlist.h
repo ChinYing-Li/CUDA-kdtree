@@ -28,8 +28,8 @@ struct SplitCandidates
 {
   int* m_prim_indices;
   int* m_starting_indices_in_prim; // indexing into array of primitives
-  unsigned long long* m_left_prim_bitmask;
-  unsigned long long* m_right_prim_bitmask;
+  long long* m_left_prim_bitmask;
+  long long* m_right_prim_bitmask;
   int* m_root_index;
   Device::SplitData m_split_data;
 };

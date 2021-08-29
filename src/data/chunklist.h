@@ -33,6 +33,8 @@ class ChunkList final : public NodeList
 public:
   ChunkList();
   ~ChunkList();
+  using NodeList::num_node;
+
   void clear() override;
   void resize_node(unsigned int size) override;
   void resize_prim(unsigned int size) override;
@@ -43,7 +45,6 @@ public:
   void sort_prim(thrust::device_vector<bool>& res);
   void clip_prim(Device::Mesh& mesh, Device::SplitData& split_data);
   void count_prim_in_child();
-
   Device::ChunkList to_device();
 
 private:

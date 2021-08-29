@@ -7,7 +7,7 @@
 
 namespace CuKee
 {
-#define MAX_PRIM_PER_SMALL_NODE 64
+const int MAX_PRIM_PER_SMALL_NODE = 64;
 
 namespace Device
 {
@@ -43,10 +43,24 @@ struct SmallNodeList
 };
 
 __global__
-void compute_SAH(Device::SmallNodeList activelist, Device::SplitCandidates splitcan);
+void preprocess(Device::SmallNodeList& activelist,
+                Device::SplitCandidates& splitcan);
 
 __global__
-void preprocess(Device::SmallNodeList activelist, Device::SplitCandidates splitcan);
+void process(Device::SmallNodeList& activelist,
+             Device::SmallNodeList& nextlist);
+
+__device__
+float compute_node_area(const glm::vec4& min_vert,
+                        const glm::vec4& max_vert);
+
+__device__
+void compute_SAH(Device::SmallNodeList activelist,
+                 Device::SplitCandidates splitcan);
+
+__device__
+void determin_split_plane(Device::SmallNodeList& activelist,
+                 Device::SplitCandidates& splitcan);
 }
 
 }

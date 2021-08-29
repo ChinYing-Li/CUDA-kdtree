@@ -31,6 +31,8 @@ class NodeList
 public:
   NodeList();
   ~NodeList();
+  friend class KDTreeGPU;
+
   virtual void clear();
   virtual void resize_node(unsigned int size);
   virtual void resize_prim(unsigned int size);

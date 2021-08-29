@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.17)
 project(CUDA-kdtree
         VERSION 0.0.1
         DESCRIPTION "GPU-acclerated KD-tree using CUDA"
-        LANGUAGES CXX C)
+        LANGUAGES CXX C CUDA)
 
 enable_testing()
 
@@ -16,6 +16,8 @@ enable_testing()
 set(CMAKE_WARN_DEPRECATED ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CUDA_STANDARD 14)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
